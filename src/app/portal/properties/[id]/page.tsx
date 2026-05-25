@@ -54,7 +54,7 @@ export default async function PropertyViewPage({
 
   const allImages = [
     property.imageUrl,
-    ...(property.imageUrls || []).filter((url) => url !== property.imageUrl),
+    ...((property.imageUrls as string[]) || []).filter((url: string) => url !== property.imageUrl),
   ].filter(Boolean) as string[];
 
   return (
