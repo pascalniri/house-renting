@@ -104,13 +104,18 @@ export default function useProperty() {
     }
   };
 
-  const updateProperty = async (id: string, data: Partial<Property>) => {
-    // Optimistic update for immediate UI feedback
-    setProperties(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+  const updateProperty = async (id: string, data: Partial<Property> | FormData) => {
+    // Optimistic update for immediate UI feedback (only if it's a simple JSON object)
+    if (!(data instanceof FormData)) {
+      setProperties(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+    }
     
     setLoading(true);
     try {
-      const res = await axiosInstance.put(`/properties/${id}`, data);
+      const isFormData = data instanceof FormData;
+      const res = await axiosInstance.put(`/properties/${id}`, data, {
+        headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+      });
       if (res.data.success) {
         toast.success("Property updated successfully!");
         setProperty(res.data.data);

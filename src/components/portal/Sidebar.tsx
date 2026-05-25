@@ -6,6 +6,7 @@ import { LayoutDashboard, Building2, PlusCircle, Settings, LogOut, Menu, X } fro
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import useAuth from "@/app/hooks/useAuth";
 
 const navItems = [
   { name: "Dashboard", href: "/portal", icon: LayoutDashboard },
@@ -16,7 +17,7 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-
+ const {logout} = useAuth();
   const NavLinks = () => (
     <div className="space-y-1">
       {navItems.map((item) => {
@@ -88,12 +89,10 @@ export function Sidebar() {
         </div>
 
         <div className="p-4 border-t border-slate-200">
-          <Link href="/auth">
-            <Button variant="ghost" className="w-full justify-start text-slate-600 hover:text-destructive hover:bg-destructive/10">
+            <Button onClick={logout} variant="ghost" className="w-full justify-start text-slate-600 hover:text-destructive hover:bg-destructive/10">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
-          </Link>
         </div>
       </aside>
     </>

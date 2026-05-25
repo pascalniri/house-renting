@@ -60,7 +60,7 @@ export default function useAuth() {
       await axiosInstance.post("/auth/logout");
       setAdmin(null);
       toast.success("Logged out successfully");
-      router.push("/login");
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
       toast.error("Logout failed. Please try again.");

@@ -34,15 +34,75 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const data = await request.json();
-    // Assuming JSON payload for PUT for now (you can upgrade to FormData if editing images is needed)
-    
-    const updatedProperty = await prisma.property.update({
-      where: { id },
-      data,
-    });
+    const contentType = request.headers.get("content-type") || "";
 
-    return NextResponse.json({ success: true, data: updatedProperty });
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      
+      const title = formData.get("title") as string;
+      const location = formData.get("location") as string;
+      const price = parseFloat(formData.get("price") as string);
+      const bedrooms = parseInt(formData.get("bedrooms") as string, 10);
+      const bathrooms = parseFloat(formData.get("bathrooms") as string);
+      const sqft = parseInt(formData.get("sqft") as string, 10);
+      const type = formData.get("type") as string;
+      const description = formData.get("description") as string;
+      
+      const ownerName = formData.get("ownerName") as string;
+      const ownerPhone = formData.get("ownerPhone") as string || null;
+      const ownerEmail = formData.get("ownerEmail") as string || null;
+      const ownerWhatsapp = formData.get("ownerWhatsapp") as string || null;
+
+      // Existing images that were kept in the UI
+      const existingImages = formData.getAll("existingImages") as string[];
+
+      // New images added in the UI
+      const newImagesFiles = formData.getAll("images") as File[];
+      const newImageUrls: string[] = [];
+
+      const { uploadImage } = await import("@/lib/cloudinary");
+
+      for (const image of newImagesFiles) {
+        if (image && image.size > 0) {
+          const buffer = Buffer.from(await image.arrayBuffer());
+          const url = await uploadImage(buffer, "house-renting/properties");
+          newImageUrls.push(url);
+        }
+      }
+
+      const allImageUrls = [...existingImages, ...newImageUrls];
+      const primaryImageUrl = allImageUrls.length > 0 ? allImageUrls[0] : "";
+
+      const updatedProperty = await prisma.property.update({
+        where: { id },
+        data: {
+          title,
+          location,
+          price,
+          bedrooms,
+          bathrooms,
+          sqft,
+          type,
+          description,
+          imageUrl: primaryImageUrl,
+          imageUrls: allImageUrls,
+          ownerName,
+          ownerPhone,
+          ownerEmail,
+          ownerWhatsapp,
+        },
+      });
+
+      return NextResponse.json({ success: true, data: updatedProperty });
+    } else {
+      // Fallback for purely JSON updates if any
+      const data = await request.json();
+      const updatedProperty = await prisma.property.update({
+        where: { id },
+        data,
+      });
+      return NextResponse.json({ success: true, data: updatedProperty });
+    }
   } catch (error: any) {
     console.error(`PUT /api/properties/[id] error:`, error);
     return NextResponse.json(

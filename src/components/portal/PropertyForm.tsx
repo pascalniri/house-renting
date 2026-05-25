@@ -110,14 +110,19 @@ export function PropertyForm({
       }
     });
     
-    // Append actual file objects
+    // Append actual new file objects
     imageFiles.forEach(file => {
       formData.append("images", file);
     });
 
+    // Append existing image URLs that are still kept in the UI
+    const existingImages = images.filter((img) => !img.startsWith("blob:"));
+    existingImages.forEach((imgUrl) => {
+      formData.append("existingImages", imgUrl);
+    });
+
     if (isEditing && initialData) {
-      // Handle array conversion for put if needed, but for now just send JSON
-      const success = await updateProperty(initialData.id, data);
+      const success = await updateProperty(initialData.id, formData);
       if (success) router.push("/portal/properties");
     } else {
       const success = await createProperty(formData);
