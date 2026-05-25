@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
 // Define the paths that don't require authentication
-const publicPaths = ['/api/auth/login', '/api/auth/forgot-password', '/api/auth/reset-password', '/login', '/forgot-password', '/reset-password'];
+const publicPaths = ['/api/auth/login', '/api/auth/forgot-password', '/api/auth/reset-password', '/auth', '/forgot-password', '/reset-password'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
       }
       
       // If it's a page, redirect to login
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL('/auth', request.url));
     }
 
     try {
@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
       if (pathname.startsWith('/api/')) {
         return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
       }
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL('/auth', request.url));
     }
   }
 
