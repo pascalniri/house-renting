@@ -33,6 +33,8 @@ export default function SettingsPage() {
 
   const currentAvatar = watch("avatar");
 
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
   // Auto-populate form when admin data loads
   useEffect(() => {
     if (admin) {
@@ -48,13 +50,26 @@ export default function SettingsPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setAvatarFile(file);
       setValue("avatar", URL.createObjectURL(file), { shouldDirty: true });
     }
   };
 
   const onSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
-    await updateProfile(data);
+    
+    const formData = new FormData();
+    formData.append("name", data.name);
+    if (data.phone) formData.append("phone", data.phone);
+    if (data.whatsapp) formData.append("whatsapp", data.whatsapp);
+    
+    if (avatarFile) {
+      formData.append("avatarFile", avatarFile);
+    } else if (data.avatar) {
+      formData.append("avatar", data.avatar);
+    }
+
+    await updateProfile(formData);
     setIsLoading(false);
   };
 
@@ -141,7 +156,7 @@ export default function SettingsPage() {
               </Label>
               <Input 
                 id="whatsapp" 
-                placeholder="e.g. +1 (555) 000-0000" 
+                placeholder="e.g. +250 ***-***-****" 
                 {...register("whatsapp")}
               />
             </div>

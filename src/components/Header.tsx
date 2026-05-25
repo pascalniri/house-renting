@@ -17,52 +17,21 @@ export function Header() {
 
         <nav className="hidden md:flex items-center gap-8">
           <Link
-            href="#"
+            href="/"
             className="text-xs font-medium text-slate-900 transition-colors"
           >
             Home
           </Link>
           <Link
-            href="#"
-            className="text-xs font-medium text-slate-500 hover:text-blue-800 transition-colors flex items-center gap-1"
+            href="/properties"
+            className="text-xs font-medium text-slate-900 transition-colors"
           >
             Properties
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
           </Link>
+        
           <Link
-            href="#"
-            className="text-xs font-medium text-slate-500 hover:text-blue-800 transition-colors flex items-center gap-1"
-          >
-            Agents
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </Link>
-          <Link
-            href="#"
-            className="text-xs font-medium text-slate-500 hover:text-blue-800 transition-colors"
+            href="/about"
+            className="text-xs font-medium text-slate-900 transition-colors"
           >
             About
           </Link>

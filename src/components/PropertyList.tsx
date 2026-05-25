@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Property, properties } from "@/data/properties";
+import { useState, useMemo, useEffect } from "react";
+import { Property } from "@/app/hooks/useProperty";
+import useProperty from "@/app/hooks/useProperty";
 import { PropertyCard } from "./PropertyCard";
 import { PropertyDetailsModal } from "./PropertyDetailsModal";
 import { Input } from "@/components/ui/input";
@@ -13,14 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
 
 export function PropertyList() {
+  const { properties, loading, fetchProperties } = useProperty();
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("All");
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
-    null,
-  );
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
 
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
@@ -32,7 +36,7 @@ export function PropertyList() {
 
       return matchesSearch && matchesType;
     });
-  }, [searchQuery, typeFilter]);
+  }, [properties, searchQuery, typeFilter]);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -103,7 +107,11 @@ export function PropertyList() {
       </div>
 
       {/* Grid */}
-      {filteredProperties.length > 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      ) : filteredProperties.length > 0 ? (
         <div className="flex flex-col">
           {filteredProperties.map((property) => (
             <PropertyCard

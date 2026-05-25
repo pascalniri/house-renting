@@ -3,11 +3,12 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const property = await prisma.property.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!property) {
@@ -19,7 +20,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: property });
   } catch (error: any) {
-    console.error(`GET /api/properties/${params.id} error:`, error);
+    console.error(`GET /api/properties/[id] error:`, error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch property", error: error.message },
       { status: 500 }
@@ -29,20 +30,21 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const data = await request.json();
     // Assuming JSON payload for PUT for now (you can upgrade to FormData if editing images is needed)
     
     const updatedProperty = await prisma.property.update({
-      where: { id: params.id },
+      where: { id },
       data,
     });
 
     return NextResponse.json({ success: true, data: updatedProperty });
   } catch (error: any) {
-    console.error(`PUT /api/properties/${params.id} error:`, error);
+    console.error(`PUT /api/properties/[id] error:`, error);
     return NextResponse.json(
       { success: false, message: "Failed to update property", error: error.message },
       { status: 500 }
@@ -52,16 +54,17 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.property.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true, message: "Property deleted successfully" });
   } catch (error: any) {
-    console.error(`DELETE /api/properties/${params.id} error:`, error);
+    console.error(`DELETE /api/properties/[id] error:`, error);
     return NextResponse.json(
       { success: false, message: "Failed to delete property", error: error.message },
       { status: 500 }

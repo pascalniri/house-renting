@@ -1,34 +1,39 @@
-import { Property } from "@/data/properties";
+import { Property } from "@/app/hooks/useProperty";
 import { Badge } from "@/components/ui/badge";
-import { Bed, Bath, Square, ChevronRight } from "lucide-react";
+import { Bed, Bath, Square, ChevronRight, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 interface PropertyCardProps {
   property: Property;
   onClick: (property: Property) => void;
+  postedBy?: { name: string | null; avatar: string | null };
 }
 
-export function PropertyCard({ property, onClick }: PropertyCardProps) {
+export function PropertyCard({ property, onClick, postedBy }: PropertyCardProps) {
   return (
     <div className="bg-white rounded-[1.25rem] border border-slate-100/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] p-6 mb-6 flex flex-col md:flex-row gap-8 transition-all hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]">
       {/* Left side: Owner & Property Details */}
       <div className="w-full md:w-5/12 flex flex-col">
         <div className="flex items-center gap-3 mb-5">
-          <div className="h-10 w-10 rounded-full overflow-hidden relative bg-slate-100 shrink-0 border border-slate-200">
-            <Image
-              src={property.owner.photoUrl}
-              alt={property.owner.name}
-              fill
-              className="object-cover"
-            />
+          <div className="h-10 w-10 rounded-full overflow-hidden relative bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
+            {(postedBy?.avatar || property.ownerPhoto) ? (
+              <Image
+                src={(postedBy?.avatar || property.ownerPhoto) as string}
+                alt={postedBy?.name || property.ownerName}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <User className="h-5 w-5 text-slate-400" />
+            )}
           </div>
           <div>
             <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider">
-              {property.owner.name}
+              {postedBy?.name || property.ownerName}
             </h4>
             <p className="text-[11px] text-slate-400 uppercase tracking-wide">
-              Property Owner
+              {postedBy ? "Posted by Admin" : "Property Owner"}
             </p>
           </div>
         </div>
@@ -76,7 +81,7 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
               <span className="text-white font-semibold text-xs drop-shadow-md leading-tight">
                 {property.location}
               </span>
@@ -84,7 +89,7 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
                 <span className="bg-white/80 h-3 w-3 rounded flex items-center justify-center mr-2 text-[8px] text-blue-800">
                   <Square className="w-2 h-2 fill-current" />
                 </span>
-                ${property.price.toLocaleString()}
+                {property.price.toLocaleString()} Rwf
               </span>
             </div>
           </div>

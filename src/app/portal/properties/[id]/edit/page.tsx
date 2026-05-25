@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { properties } from "@/data/properties";
+import { prisma } from "@/lib/prisma";
 import { PropertyForm } from "@/components/portal/PropertyForm";
 
 export default async function EditPropertyPage({
@@ -8,11 +8,21 @@ export default async function EditPropertyPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-  const property = properties.find((p) => p.id === resolvedParams.id);
+  const property = await prisma.property.findUnique({
+    where: { id: resolvedParams.id }
+  });
 
   if (!property) {
     notFound();
   }
+
+  // Need to map dates to strings if passing to Client Component if required, 
+  // but Property type from useProperty expects strings for dates. 
+  const serializedProperty = {
+    ...property,
+    createdAt: property.createdAt.toISOString(),
+    updatedAt: property.updatedAt.toISOString(),
+  };
 
   return (
     <div className="p-6 md:p-10 space-y-8 max-w-4xl mx-auto">
@@ -25,7 +35,7 @@ export default async function EditPropertyPage({
         </p>
       </div>
 
-      <PropertyForm initialData={property} isEditing />
+      <PropertyForm initialData={serializedProperty} isEditing />
     </div>
   );
 }

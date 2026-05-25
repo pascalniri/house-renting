@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Property } from "@/data/properties";
+import { Property } from "@/app/hooks/useProperty";
 import { Badge } from "@/components/ui/badge";
 import {
   MapPin,
@@ -14,6 +14,7 @@ import {
   Copy,
   Check,
   ExternalLink,
+  User,
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
@@ -96,7 +97,7 @@ export function PropertyDetailsModal({
                 {property.type}
               </Badge>
               <Badge className="bg-blue-800 hover:bg-blue-700 text-white shadow-md">
-                ${property.price.toLocaleString()}
+                Rwf {property.price.toLocaleString()}
               </Badge>
             </div>
           </div>
@@ -217,17 +218,21 @@ export function PropertyDetailsModal({
                 </h3>
                 <div className="flex flex-col gap-5">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm shrink-0">
-                      <Image
-                        src={property.owner.photoUrl}
-                        alt={property.owner.name}
-                        fill
-                        className="object-cover"
-                      />
+                    <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm shrink-0 bg-slate-100 flex items-center justify-center">
+                      {property.ownerPhoto ? (
+                        <Image
+                          src={property.ownerPhoto}
+                          alt={property.ownerName}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <User className="h-5 w-5 text-slate-400" />
+                      )}
                     </div>
                     <div>
                       <p className="font-semibold text-slate-900 dark:text-slate-100">
-                        {property.owner.name}
+                        {property.ownerName}
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         Property Owner
@@ -246,14 +251,14 @@ export function PropertyDetailsModal({
                             Email
                           </p>
                           <p className="text-xs font-medium text-slate-900 dark:text-slate-100 truncate">
-                            {property.owner.email}
+                            {property.ownerEmail || "No email provided"}
                           </p>
                         </div>
                       </div>
                       <div className="flex gap-1 shrink-0">
                         <button
                           onClick={() =>
-                            handleCopy(property.owner.email, "email")
+                            handleCopy(property.ownerEmail || "", "email")
                           }
                           className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors text-slate-500"
                           title="Copy Email"
@@ -268,7 +273,7 @@ export function PropertyDetailsModal({
                           )}
                         </button>
                         <Link
-                          href={`mailto:${property.owner.email}`}
+                          href={`mailto:${property.ownerEmail}`}
                           className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors text-blue-600 dark:text-blue-400"
                           title="Send Email"
                         >
@@ -287,14 +292,14 @@ export function PropertyDetailsModal({
                             Phone
                           </p>
                           <p className="text-xs font-medium text-slate-900 dark:text-slate-100 truncate">
-                            {property.owner.phone}
+                            {property.ownerPhone || "No phone provided"}
                           </p>
                         </div>
                       </div>
                       <div className="flex gap-1 shrink-0">
                         <button
                           onClick={() =>
-                            handleCopy(property.owner.phone, "phone")
+                            handleCopy(property.ownerPhone || "", "phone")
                           }
                           className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors text-slate-500"
                           title="Copy Phone"
@@ -309,7 +314,7 @@ export function PropertyDetailsModal({
                           )}
                         </button>
                         <Link
-                          href={`tel:${property.owner.phone}`}
+                          href={`tel:${property.ownerPhone}`}
                           className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors text-blue-600 dark:text-blue-400"
                           title="Call Phone"
                         >

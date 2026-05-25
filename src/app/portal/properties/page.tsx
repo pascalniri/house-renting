@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PlusCircle, Edit, Trash2, Eye } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Eye, Loader2, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { properties } from "@/data/properties";
+import useProperty from "@/app/hooks/useProperty";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -29,7 +29,13 @@ const ITEMS_PER_PAGE = 5;
 
 export default function PropertiesPage() {
   const [currentPage, setCurrentPage] = useState(1);
-  
+  const { properties, loading, fetchProperties, deleteProperty, updateProperty } = useProperty();
+
+  // Fetch properties on mount
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
+
   // Calculate total pages
   const totalPages = Math.ceil(properties.length / ITEMS_PER_PAGE);
   
@@ -41,6 +47,20 @@ export default function PropertiesPage() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this property?")) {
+      await deleteProperty(id);
+      // Adjust pagination if needed
+      if (currentProperties.length === 1 && currentPage > 1) {
+        setCurrentPage(prev => prev - 1);
+      }
+    }
+  };
+
+  const handleTogglePublish = async (id: string, currentStatus: boolean) => {
+    await updateProperty(id, { isPublished: !currentStatus });
   };
 
   return (
@@ -83,12 +103,16 @@ export default function PropertiesPage() {
                 >
                   <TableCell className="py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-slate-200">
-                        <img
-                          src={property.imageUrl}
-                          alt={property.title}
-                          className="h-full w-full object-cover"
-                        />
+                      <div className="h-10 w-10 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-slate-200 flex items-center justify-center">
+                        {property.imageUrl ? (
+                          <img
+                            src={property.imageUrl}
+                            alt={property.title}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <Home className="h-5 w-5 text-slate-400" />
+                        )}
                       </div>
                       <div className="font-medium text-slate-900 truncate max-w-[200px]">
                         {property.title}
@@ -104,9 +128,13 @@ export default function PropertiesPage() {
                   <TableCell className="text-slate-600 py-4">{property.type}</TableCell>
                   <TableCell className="py-4">
                     <div className="flex items-center gap-2">
-                      <Switch defaultChecked={true} id={`publish-${property.id}`} />
+                      <Switch 
+                        checked={property.isPublished} 
+                        onCheckedChange={() => handleTogglePublish(property.id, property.isPublished)}
+                        id={`publish-${property.id}`} 
+                      />
                       <Label htmlFor={`publish-${property.id}`} className="text-xs text-slate-600 font-normal cursor-pointer">
-                        Published
+                        {property.isPublished ? "Published" : "Draft"}
                       </Label>
                     </div>
                   </TableCell>
@@ -135,6 +163,7 @@ export default function PropertiesPage() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => handleDelete(property.id)}
                         className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
                       >
                         <Trash2 size={12} />
@@ -146,8 +175,15 @@ export default function PropertiesPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                  No properties found. Add your first property to get started.
+                <TableCell colSpan={6} className="h-32 text-center text-slate-500">
+                  {loading ? (
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                      <p>Loading properties...</p>
+                    </div>
+                  ) : (
+                    "No properties found. Add your first property to get started."
+                  )}
                 </TableCell>
               </TableRow>
             )}

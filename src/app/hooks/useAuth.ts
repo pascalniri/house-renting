@@ -87,9 +87,12 @@ export default function useAuth() {
     }
   };
 
-  const updateProfile = async (data: ProfileFormData) => {
+  const updateProfile = async (data: ProfileFormData | FormData) => {
     try {
-      const res = await axiosInstance.post("/auth/update-profile", data);
+      const isFormData = data instanceof FormData;
+      const res = await axiosInstance.post("/auth/update-profile", data, {
+        headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+      });
       if (res.data.success) {
         setAdmin(res.data.admin);
         toast.success("Profile updated successfully");

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { uploadImage } from "@/lib/cloudinary";
 
 export async function POST(request: Request) {
   try {
@@ -18,18 +19,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Invalid token" }, { status: 401 });
     }
 
-    const data = await request.json();
-    const { name, phone, whatsapp, avatar } = data;
+    const formData = await request.formData();
+    const name = formData.get("name") as string;
+    const phone = formData.get("phone") as string || null;
+    const whatsapp = formData.get("whatsapp") as string || null;
+    let avatarUrl = formData.get("avatar") as string || null;
 
-    // We do not allow changing email through this endpoint for security reasons, 
-    // unless you want to add email verification flow later.
+    const avatarFile = formData.get("avatarFile") as File | null;
+    if (avatarFile && avatarFile.size > 0) {
+      const buffer = Buffer.from(await avatarFile.arrayBuffer());
+      avatarUrl = await uploadImage(buffer, "house-renting/avatars");
+    }
+
     const updatedAdmin = await prisma.admin.update({
       where: { id: payload.id as string },
       data: {
         name,
         phone,
         whatsapp,
-        avatar
+        avatar: avatarUrl
       },
       select: {
         id: true,

@@ -85,7 +85,7 @@ export default function AuthPage() {
                       <Label htmlFor="password">
                         Password
                       </Label>
-                      <Link href="#" className="text-xs text-blue-800 hover:underline">
+                      <Link href="/forgot-password" className="text-xs text-blue-800 hover:underline">
                         Forgot password?
                       </Link>
                     </div>
