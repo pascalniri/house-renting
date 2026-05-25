@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  engineType      = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Property {
+  id            String   @id @default(cuid())
+  title         String
+  location      String
+  price         Float
+  bedrooms      Int
+  bathrooms     Float
+  sqft          Int
+  type          String
+  description   String
+  imageUrl      String
+  imageUrls     String[]
+  
+  // Owner info embedded
+  ownerName     String
+  ownerPhone    String?
+  ownerEmail    String?
+  ownerPhoto    String?
+  ownerWhatsapp String?
+  
+  isPublished   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Admin {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  name               String?
+  phone              String?
+  whatsapp           String?
+  avatar             String?
+  passwordHash       String
+  resetToken         String?
+  resetTokenExpiry   DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
