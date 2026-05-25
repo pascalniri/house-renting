@@ -13,6 +13,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow public access to GET /api/properties for visitor pages
+  if (request.method === 'GET' && pathname.startsWith('/api/properties')) {
+    return NextResponse.next();
+  }
+
   // Protect /portal routes and /api/auth (except public ones)
   if (pathname.startsWith('/portal') || (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/'))) {
     const token = request.cookies.get('auth_token')?.value;

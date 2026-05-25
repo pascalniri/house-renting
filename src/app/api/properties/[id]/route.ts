@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
 
 export async function GET(
   request: Request,
@@ -7,13 +9,31 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const property = await prisma.property.findUnique({
-      where: { id },
+    
+    let isAuthenticated = false;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+
+    if (token) {
+      try {
+        const secret = new TextEncoder().encode(
+          process.env.JWT_SECRET || 'super-secret-fallback-key-do-not-use-in-production'
+        );
+        await jwtVerify(token, secret);
+        isAuthenticated = true;
+      } catch (e) {}
+    }
+
+    const whereClause: any = { id };
+    if (!isAuthenticated) whereClause.isPublished = true;
+
+    const property = await prisma.property.findFirst({
+      where: whereClause,
     });
 
     if (!property) {
       return NextResponse.json(
-        { success: false, message: "Property not found" },
+        { success: false, message: "Property not found or is not published" },
         { status: 404 }
       );
     }

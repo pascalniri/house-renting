@@ -1,14 +1,36 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { uploadImage } from "@/lib/cloudinary";
+import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type");
 
+    let isAuthenticated = false;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+
+    if (token) {
+      try {
+        const secret = new TextEncoder().encode(
+          process.env.JWT_SECRET || 'super-secret-fallback-key-do-not-use-in-production'
+        );
+        await jwtVerify(token, secret);
+        isAuthenticated = true;
+      } catch (e) {
+        // Invalid token
+      }
+    }
+
+    const whereClause: any = {};
+    if (type) whereClause.type = type;
+    if (!isAuthenticated) whereClause.isPublished = true;
+
     const properties = await prisma.property.findMany({
-      where: type ? { type } : undefined,
+      where: whereClause,
       orderBy: { createdAt: "desc" },
     });
 
